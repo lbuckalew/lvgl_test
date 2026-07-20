@@ -1,0 +1,42 @@
+#include <zephyr/dt-bindings/display/panel.h>
+
+/ {
+	chosen {
+		zephyr,display = &round_lcd;
+	};
+
+	display_mipi_dbi {
+		status = "okay";
+		compatible = "zephyr,mipi-dbi-spi";
+		spi-dev = <&spi3>;
+		dc-gpios = <&gpio1 11 GPIO_ACTIVE_HIGH>;
+		reset-gpios = <&gpio1 10 GPIO_ACTIVE_LOW>;
+		write-only;
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		round_lcd: gc9a01@0 {
+			status = "okay";
+			compatible = "galaxycore,gc9x01x";
+			reg = <0>;
+			mipi-max-frequency = <DT_FREQ_M(16)>;
+			pixel-format = <PANEL_PIXEL_FORMAT_RGB_565>;
+			width = <240>;
+			height = <240>;
+			display-inversion;
+		};
+	};
+};
+
+&arduino_spi {
+	max-frequency = <DT_FREQ_M(16)>;
+};
+
+&arduino_i2c {
+	status = "okay";
+	bme280@76 {
+		compatible = "bosch,bme280";
+		reg = <0x76>;
+		status = "okay";
+	};
+};

@@ -1,0 +1,22 @@
+{
+    "version": 2,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 20
+    },
+    "configurePresets": [
+        {
+            "name": "build_dev",
+            "displayName": "Build for nRF52840 DK nRF52840",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build_dev",
+            "cacheVariables": {
+                "NCS_TOOLCHAIN_VERSION": "NONE",
+                "BOARD": "nrf52840dk/nrf52840",
+                "EXTRA_CONF_FILE": "config/logging.conf",
+                "DEBUG_THREAD_INFO": false,
+                "lvgl_test_DEBUG_THREAD_INFO": false
+            }
+        }
+    ]
+}

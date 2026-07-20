@@ -1,0 +1,11 @@
+mainmenu "LVGL Application"
+
+source "Kconfig.zephyr"
+
+menu "Application Logging"
+
+module = LVGL_APP
+module-str = LVGL Application
+source "subsys/logging/Kconfig.template.log_config"
+
+endmenu
