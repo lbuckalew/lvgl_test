@@ -1,6 +1,8 @@
 #include "gui_theme.h"
 #include "gui_app.h"
-#include "utilities/overview_utility.h"
+
+#include "utilities/overview/overview_utility.h"
+
 #include <zephyr/kernel.h>
 #include <zephyr/drivers/display.h>
 #include <zephyr/logging/log.h>

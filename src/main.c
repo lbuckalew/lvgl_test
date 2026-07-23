@@ -92,7 +92,7 @@ int main(void)
         gui_app_set_pressure(sensor_q31_to_double(&press_data));
 
         counter++;
-        if (counter == 25) {
+        if (counter == 20) {
             gui_app_trigger_btn1();
             counter = 0;
         }

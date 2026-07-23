@@ -1,7 +1,7 @@
 #ifndef OVERVIEW_UTILITY_H
 #define OVERVIEW_UTILITY_H
 
-#include "gui_utility.h"
+#include "../gui_utility.h"
 
 extern const struct gui_utility overview_utility;
 void overview_set_rh(double rh);
