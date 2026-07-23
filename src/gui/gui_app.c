@@ -1,5 +1,6 @@
 #include "gui_theme.h"
 #include "gui_app.h"
+#include "../sensor_msgq.h"
 
 #include "utilities/overview/overview_utility.h"
 
@@ -12,14 +13,12 @@ LOG_MODULE_DECLARE(lvgl_app, CONFIG_LVGL_APP_LOG_LEVEL);
 
 #define GUI_THREAD_STACK_SIZE 2048
 #define GUI_THREAD_PRIORITY   5
-#define GUI_MSG_QUEUE_DEPTH   8
 
 K_THREAD_STACK_DEFINE(gui_thread_stack, GUI_THREAD_STACK_SIZE);
 static struct k_thread gui_thread_data;
 static k_tid_t gui_thread_id;
 
 static const struct gui_utility *current_utility;
-K_MSGQ_DEFINE(gui_msgq, sizeof(struct gui_msg), GUI_MSG_QUEUE_DEPTH, 4);
 
 const struct device *display;
 lv_obj_t *screen;
@@ -151,7 +150,7 @@ static void gui_thread(void *arg1, void *arg2, void *arg3)
 
     struct gui_msg msg;
     for (;;) {
-        rc = k_msgq_get(&gui_msgq, &msg, K_MSEC(10));
+        rc = k_msgq_get(&sensor_msgq, &msg, K_MSEC(10));
 
         if (rc == 0) {
             gui_process_message(&msg);
@@ -190,7 +189,7 @@ int gui_app_start(void)
 int gui_app_trigger_btn1(void)
 {
     const struct gui_msg msg = {.type = GUI_MSG_BTN_1,};
-    return k_msgq_put(&gui_msgq, &msg, K_NO_WAIT);
+    return k_msgq_put(&sensor_msgq, &msg, K_NO_WAIT);
 }
 
 int gui_app_set_relative_humidity(double relative_humidity)
@@ -200,7 +199,7 @@ int gui_app_set_relative_humidity(double relative_humidity)
         .data.meas = relative_humidity,
     };
 
-    return k_msgq_put(&gui_msgq, &msg, K_NO_WAIT);
+    return k_msgq_put(&sensor_msgq, &msg, K_NO_WAIT);
 }
 
 int gui_app_set_temperature(double temperature)
@@ -210,7 +209,7 @@ int gui_app_set_temperature(double temperature)
         .data.meas = temperature,
     };
 
-    return k_msgq_put(&gui_msgq, &msg, K_NO_WAIT);
+    return k_msgq_put(&sensor_msgq, &msg, K_NO_WAIT);
 }
 
 int gui_app_set_pressure(double pressure)
@@ -220,5 +219,5 @@ int gui_app_set_pressure(double pressure)
         .data.meas = pressure,
     };
 
-    return k_msgq_put(&gui_msgq, &msg, K_NO_WAIT);
+    return k_msgq_put(&sensor_msgq, &msg, K_NO_WAIT);
 }
