@@ -1,6 +1,6 @@
 #include "gui_theme.h"
 #include "gui_app.h"
-#include "utilities/overview_util.h"
+#include "utilities/overview_utility.h"
 #include <zephyr/kernel.h>
 #include <zephyr/drivers/display.h>
 #include <zephyr/logging/log.h>
@@ -16,9 +16,8 @@ K_THREAD_STACK_DEFINE(gui_thread_stack, GUI_THREAD_STACK_SIZE);
 static struct k_thread gui_thread_data;
 static k_tid_t gui_thread_id;
 
-K_MSGQ_DEFINE(gui_msgq, sizeof(struct gui_msg), GUI_MSG_QUEUE_DEPTH, 4);
-
 static const struct gui_utility *current_utility;
+K_MSGQ_DEFINE(gui_msgq, sizeof(struct gui_msg), GUI_MSG_QUEUE_DEPTH, 4);
 
 const struct device *display;
 lv_obj_t *screen;
@@ -33,7 +32,7 @@ static int _init_content(void)
     content = lv_obj_create(screen);
 
     lv_obj_set_size(content, LV_PCT(100), LV_PCT(100));
-    lv_obj_set_style_text_color(content, GUI_COLOR_TEXT, LV_PART_MAIN);
+    lv_obj_set_style_text_color(content, GUI_COLOR(GUI_RGB_TEXT), LV_PART_MAIN);
     lv_obj_center(content);
 
     return 0;
@@ -49,7 +48,7 @@ static int _init_screen(void)
 
     lv_obj_clear_flag(screen, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_set_style_bg_opa(screen, LV_OPA_COVER, LV_PART_MAIN);
-    lv_obj_set_style_bg_color(screen, GUI_COLOR_BG, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(screen, GUI_COLOR(GUI_RGB_BG), LV_PART_MAIN);
 
     return 0;
 }
@@ -111,6 +110,11 @@ static void gui_process_message(const struct gui_msg *msg)
 
     case GUI_MSG_LOAD_UTILITY:
         LOG_ERR("Add ability to change utilities.");
+        break;
+
+    case GUI_MSG_BTN_1:
+        LOG_INF("Button 1 press trigger received.");
+        overview_rotate_next();
         break;
 
     default:
@@ -179,6 +183,12 @@ int gui_app_start(void)
     k_thread_name_set(gui_thread_id, "gui_app");
 
     return 0;
+}
+
+int gui_app_trigger_btn1(void)
+{
+    const struct gui_msg msg = {.type = GUI_MSG_BTN_1,};
+    return k_msgq_put(&gui_msgq, &msg, K_NO_WAIT);
 }
 
 int gui_app_set_relative_humidity(double relative_humidity)

@@ -8,44 +8,37 @@
 #define GUI_FONT_M &lv_font_montserrat_24
 #define GUI_FONT_L &lv_font_montserrat_48
 
-/* Base surfaces */
-#define GUI_COLOR_BG              lv_color_hex(0x101418)
-#define GUI_COLOR_SURFACE         lv_color_hex(0x181E24)
-#define GUI_COLOR_SURFACE_ALT     lv_color_hex(0x202830)
-#define GUI_COLOR_SURFACE_RAISED  lv_color_hex(0x29333D)
+/* Raw RGB values */
+#define GUI_RGB_BG              0x101418
+#define GUI_RGB_SURFACE         0x181E24
+#define GUI_RGB_SURFACE_ALT     0x202830
+#define GUI_RGB_SURFACE_RAISED  0x29333D
 
-/* Borders and subdued UI elements */
-#define GUI_COLOR_BORDER          lv_color_hex(0x35424D)
-#define GUI_COLOR_DIVIDER         lv_color_hex(0x28333C)
-#define GUI_COLOR_DISABLED        lv_color_hex(0x56616A)
+#define GUI_RGB_TEXT            0xF2F6F8
+#define GUI_RGB_TEXT_MUTED      0xA8B4BC
+#define GUI_RGB_TEXT_DIM        0x71808A
 
-/* Text */
-#define GUI_COLOR_TEXT            lv_color_hex(0xF2F6F8)
-#define GUI_COLOR_TEXT_MUTED      lv_color_hex(0xA8B4BC)
-#define GUI_COLOR_TEXT_DIM        lv_color_hex(0x71808A)
+#define GUI_RGB_BLUE_DARK        0x123B55
+#define GUI_RGB_BLUE             0x1677A8
+#define GUI_RGB_BLUE_LIGHT       0x43B9E6
+#define GUI_RGB_BLUE_BRIGHT      0x79D7F2
 
-/* Blue accent family */
-#define GUI_COLOR_BLUE_DARK       lv_color_hex(0x123B55)
-#define GUI_COLOR_BLUE            lv_color_hex(0x1677A8)
-#define GUI_COLOR_BLUE_LIGHT      lv_color_hex(0x43B9E6)
-#define GUI_COLOR_BLUE_BRIGHT     lv_color_hex(0x79D7F2)
+#define GUI_RGB_GREEN_DARK       0x184B2D
+#define GUI_RGB_GREEN            0x23995A
+#define GUI_RGB_GREEN_LIGHT      0x53D98C
+#define GUI_RGB_GREEN_BRIGHT     0x8EF2BE
 
-/* Warm highlight family */
-#define GUI_COLOR_ORANGE_DARK     lv_color_hex(0x8A4218)
-#define GUI_COLOR_ORANGE          lv_color_hex(0xD46B24)
-#define GUI_COLOR_ORANGE_LIGHT    lv_color_hex(0xF49A4A)
+#define GUI_RGB_ORANGE_DARK      0x6A3B12
+#define GUI_RGB_ORANGE           0xD96C17
+#define GUI_RGB_ORANGE_LIGHT     0xF5A03A
+#define GUI_RGB_ORANGE_BRIGHT    0xFFD07A
 
-/* Additional accents */
-#define GUI_COLOR_TEAL            lv_color_hex(0x28B8A7)
-#define GUI_COLOR_GREEN           lv_color_hex(0x55B979)
-#define GUI_COLOR_PURPLE          lv_color_hex(0x8D75D6)
-#define GUI_COLOR_RED             lv_color_hex(0xD95C5C)
-#define GUI_COLOR_YELLOW          lv_color_hex(0xD6B84C)
+#define GUI_RGB_TEAL            0x28B8A7
+#define GUI_RGB_PURPLE          0x8D75D6
+#define GUI_RGB_RED             0xD95C5C
+#define GUI_RGB_YELLOW          0xD6B84C
 
-/* Semantic colors */
-#define GUI_COLOR_SUCCESS         GUI_COLOR_GREEN
-#define GUI_COLOR_WARNING         GUI_COLOR_ORANGE
-#define GUI_COLOR_ERROR           GUI_COLOR_RED
-#define GUI_COLOR_INFO            GUI_COLOR_BLUE_LIGHT
+/* Runtime LVGL color conversion */
+#define GUI_COLOR(rgb) lv_color_hex(rgb)
 
 #endif

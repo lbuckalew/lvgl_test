@@ -59,6 +59,7 @@ int main(void)
         goto exit;
     }
 
+    int counter = 0;
     for (;;) {
         uint8_t sensor_buf[128];
 
@@ -89,6 +90,12 @@ int main(void)
         gui_app_set_relative_humidity(sensor_q31_to_double(&hum_data));
         gui_app_set_temperature(sensor_q31_to_double(&temp_data));
         gui_app_set_pressure(sensor_q31_to_double(&press_data));
+
+        counter++;
+        if (counter == 25) {
+            gui_app_trigger_btn1();
+            counter = 0;
+        }
 
         k_msleep(1000);
     }

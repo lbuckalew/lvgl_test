@@ -4,4 +4,5 @@ target_sources(app PRIVATE
     img_humidity_small.c
     img_pressure_small.c
     img_temperature_small.c
+    img_temperature_s.c
 )
