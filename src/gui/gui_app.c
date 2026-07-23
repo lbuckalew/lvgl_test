@@ -1,15 +1,13 @@
 #include "gui_theme.h"
 #include "gui_app.h"
 #include "../sensor_msgq.h"
-
 #include "utilities/overview/overview_utility.h"
-
 #include <zephyr/kernel.h>
 #include <zephyr/drivers/display.h>
 #include <zephyr/logging/log.h>
 #include <lvgl.h>
 
-LOG_MODULE_DECLARE(lvgl_app, CONFIG_LVGL_APP_LOG_LEVEL);
+LOG_MODULE_REGISTER(gui_app, CONFIG_LVGL_APP_LOG_LEVEL);
 
 #define GUI_THREAD_STACK_SIZE 2048
 #define GUI_THREAD_PRIORITY   5
@@ -27,7 +25,7 @@ lv_obj_t *content;
 static int _init_content(void)
 {
     if (screen == NULL) {
-        LOG_ERR("Screen pointer was NULL when trying to create container container.");
+        LOG_WRN("Screen pointer was NULL when trying to create container container.");
         return -EFAULT;
     }
     content = lv_obj_create(screen);
@@ -43,7 +41,7 @@ static int _init_screen(void)
 {
     screen = lv_scr_act();
     if (screen == NULL) {
-        LOG_ERR("Screen pointer returned was NULL.");
+        LOG_WRN("Screen pointer returned was NULL.");
         return -EFAULT;
     }
 
@@ -58,7 +56,7 @@ static int _init_display(void)
 {
     display = DEVICE_DT_GET(DT_CHOSEN(zephyr_display));
     if (display == NULL) {
-        LOG_ERR("Could not retrieve display device.");
+        LOG_WRN("Could not retrieve display device.");
         return -ENODEV;
     }
 
@@ -67,7 +65,6 @@ static int _init_display(void)
         return -ENODEV;
     }
 
-    LOG_INF("Display device is ready to use.");
     return 0;
 }
 
@@ -114,8 +111,8 @@ static void gui_process_message(const struct gui_msg *msg)
         break;
 
     case GUI_MSG_BTN_1:
-        LOG_INF("Button 1 press trigger received.");
-        overview_rotate_next();
+        LOG_INF("Button 1 triggered <gui next widget>.");
+        overview_focus_next();
         break;
 
     default:
@@ -131,13 +128,22 @@ static void gui_thread(void *arg1, void *arg2, void *arg3)
     ARG_UNUSED(arg3);
 
     int rc = _init_display();
-    if (rc != 0) return;
+    if (rc != 0) {
+        LOG_ERR("Failed to init display device.");
+        return;
+    }
 
     rc = _init_screen();
-    if (rc != 0) return;
+    if (rc != 0) {
+        LOG_ERR("Failed to init screen controller.");
+        return;
+    }
 
     rc = _init_content();
-    if (rc != 0) return;
+    if (rc != 0) {
+        LOG_ERR("Failed to initialize GUI.");
+        return;
+    }
 
     display_blanking_off(display);
     lv_task_handler();
@@ -150,9 +156,7 @@ static void gui_thread(void *arg1, void *arg2, void *arg3)
 
     struct gui_msg msg;
     for (;;) {
-        rc = k_msgq_get(&sensor_msgq, &msg, K_MSEC(10));
-
-        if (rc == 0) {
+        if (k_msgq_get(&sensor_msgq, &msg, K_MSEC(10)) == 0) {
             gui_process_message(&msg);
         }
 
@@ -184,40 +188,4 @@ int gui_app_start(void)
     k_thread_name_set(gui_thread_id, "gui_app");
 
     return 0;
-}
-
-int gui_app_trigger_btn1(void)
-{
-    const struct gui_msg msg = {.type = GUI_MSG_BTN_1,};
-    return k_msgq_put(&sensor_msgq, &msg, K_NO_WAIT);
-}
-
-int gui_app_set_relative_humidity(double relative_humidity)
-{
-    const struct gui_msg msg = {
-        .type = GUI_MSG_SET_RELATIVE_HUMIDITY,
-        .data.meas = relative_humidity,
-    };
-
-    return k_msgq_put(&sensor_msgq, &msg, K_NO_WAIT);
-}
-
-int gui_app_set_temperature(double temperature)
-{
-    const struct gui_msg msg = {
-        .type = GUI_MSG_SET_TEMPERATURE,
-        .data.meas = temperature,
-    };
-
-    return k_msgq_put(&sensor_msgq, &msg, K_NO_WAIT);
-}
-
-int gui_app_set_pressure(double pressure)
-{
-    const struct gui_msg msg = {
-        .type = GUI_MSG_SET_PRESSURE,
-        .data.meas = pressure,
-    };
-
-    return k_msgq_put(&sensor_msgq, &msg, K_NO_WAIT);
 }

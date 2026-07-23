@@ -7,6 +7,6 @@ extern const struct gui_utility overview_utility;
 void overview_set_rh(double rh);
 void overview_set_press(double press);
 void overview_set_temp(double temp);
-void overview_rotate_next(void);
+void overview_focus_next(void);
 
 #endif

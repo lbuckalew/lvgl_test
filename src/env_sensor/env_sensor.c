@@ -1,9 +1,6 @@
 #include "../sensor_msgq.h"
 #include "env_sensor.h"
-
 #include <zephyr/kernel.h>
-// #include <zephyr/device.h>
-// #include <zephyr/devicetree.h>
 #include <zephyr/drivers/sensor.h>
 #include <zephyr/drivers/sensor_data_types.h>
 #include <zephyr/rtio/rtio.h>
@@ -14,7 +11,7 @@ LOG_MODULE_REGISTER(env_sensor, CONFIG_LVGL_APP_LOG_LEVEL);
 
 const struct device *const env_dev = DEVICE_DT_GET_ANY(bosch_bme280);
 const struct sensor_decoder_api *decoder;
-uint8_t sensor_buf[128];
+uint8_t sensor_buf[128] __aligned(8);
 
 RTIO_DEFINE(ctx, 1, 1);
 SENSOR_DT_READ_IODEV(
@@ -47,6 +44,7 @@ static double sensor_q31_to_double(const struct sensor_q31_data *data)
 
 int env_sensor_fetch()
 {
+    
     int rc = sensor_read(&iodev, &ctx, sensor_buf, 128);
     if (rc != 0) {
         LOG_WRN("%s: sensor_read() failed: %d", env_dev->name, rc);

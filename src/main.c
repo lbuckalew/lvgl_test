@@ -3,7 +3,6 @@
 #include "gui/gui_app.h"
 
 #include <zephyr/kernel.h>
-// #include <zephyr/device.h>
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/logging/log.h>
 
@@ -55,7 +54,7 @@ static int setup_input()
 
 	gpio_init_callback(&btn1_cb_data, button_pressed, BIT(btn1.pin));
 	gpio_add_callback(btn1.port, &btn1_cb_data);
-	LOG_INF("Set up btn1 at %s pin %d", btn1.port->name, btn1.pin);
+	LOG_INF("Set up devkit Button 1.");
 
     return 0;
 }

@@ -11,11 +11,9 @@ LOG_MODULE_DECLARE(lvgl_app, CONFIG_LVGL_APP_LOG_LEVEL);
 
 #define COMP_SIZE 64
 
-const char *dummy_str = ":V";
-
 enum component_positions {
-    COMP_POS_ACTIVE,
     COMP_POS_NEXT,
+    COMP_POS_ACTIVE,
     COMP_POS_LAST,
 };
 
@@ -24,7 +22,7 @@ struct lvgl_point {
     lv_coord_t y;
 };
 
-struct component_move_anim {
+struct next_comp_anim {
     struct mini_sensor_view *component;
 
     lv_coord_t start_x;
@@ -34,26 +32,41 @@ struct component_move_anim {
     lv_coord_t end_y;
 };
 
+const char *dummy_str = ":V";
+static bool next_comp_anim_active = false;
 static struct mini_sensor_view *const components[] = {
     &humidity_view,
     &temperature_view,
     &pressure_view,
 };
-
 static const struct lvgl_point component_locations[] = {
     [COMP_POS_ACTIVE] = {.x = -75,  .y = 0  },
     [COMP_POS_NEXT] =   {.x = 38,   .y = 65 },
     [COMP_POS_LAST] =   {.x = 38,   .y = -65},
 };
+static struct next_comp_anim comp_focus_anims[ARRAY_SIZE(components)];
 
-static struct component_move_anim move_anims[ARRAY_SIZE(components)];
-
-static void comp_move_anim_exec(void *var, int32_t progress)
+static enum component_positions next_position(enum component_positions current_position)
 {
-    struct component_move_anim *move = var;
+    if (current_position == COMP_POS_LAST) {
+        return COMP_POS_NEXT;
+    }
+    return ++current_position;
+
+}
+
+static void next_comp_anim_exec(void *var, int32_t progress)
+{
+    struct next_comp_anim *move = var;
     lv_coord_t x = move->start_x + ((move->end_x - move->start_x) * progress) / 1000;
     lv_coord_t y = move->start_y + ((move->end_y - move->start_y) * progress) / 1000;
     lv_obj_align(move->component->lvo_root, LV_ALIGN_CENTER, x, y);
+}
+
+static void next_comp_anim_done(lv_anim_t *anim)
+{
+    ARG_UNUSED(anim);
+    next_comp_anim_active = false;
 }
 
 static int comp_create(struct mini_sensor_view *component, lv_obj_t *lvo_parent)
@@ -124,7 +137,6 @@ static void comp_render(struct mini_sensor_view *component)
         component->data_scale_min,
         component->data_scale_max
     );
-    LOG_INF("Render %d", component->data_repr_int);
     snprintf(
         component->data_repr_str,
         sizeof(component->data_repr_str),
@@ -176,17 +188,22 @@ static void util_destroy(void)
     }
 }
 
-void overview_rotate_next(void)
+void overview_focus_next(void)
 {
-    static int position_count = ARRAY_SIZE(component_locations);
+    if (next_comp_anim_active) {
+        LOG_WRN("Rotation blocked - animation already in progress.");
+        return;
+    }
+    next_comp_anim_active = true;
 
-    for (size_t i = 0; i < ARRAY_SIZE(components); i++) {
+    int num_components = ARRAY_SIZE(components);
+    for (size_t i = 0; i < num_components; i++) {
         struct mini_sensor_view *component = components[i];
 
         int old_location = component->location_id;
-        int new_location = (old_location + position_count - 1) % position_count;
+        int new_location = next_position(old_location);
 
-        struct component_move_anim *move = &move_anims[i];
+        struct next_comp_anim *move = &comp_focus_anims[i];
 
         move->component = component;
         move->start_x = component_locations[old_location].x;
@@ -198,12 +215,16 @@ void overview_rotate_next(void)
         lv_anim_init(&anim);
 
         lv_anim_set_var(&anim, move);
-        lv_anim_set_exec_cb(&anim, comp_move_anim_exec);
+        lv_anim_set_exec_cb(&anim, next_comp_anim_exec);
 
         lv_anim_set_values(&anim, 0, 1000);
         lv_anim_set_time(&anim, 400);
 
         lv_anim_set_path_cb(&anim, lv_anim_path_ease_in_out);
+
+        if (i == ARRAY_SIZE(components) - 1) {
+            lv_anim_set_ready_cb(&anim, next_comp_anim_done);
+        }
 
         lv_anim_start(&anim);
 
