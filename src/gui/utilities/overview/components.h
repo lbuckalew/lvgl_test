@@ -24,7 +24,7 @@ struct mini_sensor_view {
     lv_obj_t *lvo_root;
     lv_obj_t *lvo_data_meter;
     lv_obj_t *lvo_data_value;
-    lv_obj_t *lvo_data_unit;
+    // lv_obj_t *lvo_data_unit;
 };
 
 extern struct mini_sensor_view humidity_view;

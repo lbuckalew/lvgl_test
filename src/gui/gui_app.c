@@ -28,8 +28,8 @@ static int _init_content(void)
         LOG_WRN("Screen pointer was NULL when trying to create container container.");
         return -EFAULT;
     }
+    
     content = lv_obj_create(screen);
-
     lv_obj_set_size(content, LV_PCT(100), LV_PCT(100));
     lv_obj_set_style_text_color(content, GUI_COLOR(GUI_RGB_TEXT), LV_PART_MAIN);
     lv_obj_center(content);

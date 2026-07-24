@@ -9,7 +9,7 @@
 
 LOG_MODULE_DECLARE(lvgl_app, CONFIG_LVGL_APP_LOG_LEVEL);
 
-#define COMP_SIZE 64
+#define COMP_SIZE 64 // Component size in pixels
 
 enum component_positions {
     COMP_POS_NEXT,
@@ -55,6 +55,17 @@ static enum component_positions next_position(enum component_positions current_p
 
 }
 
+static struct mini_sensor_view* get_active_component()
+{
+    for (int i=0; i<ARRAY_SIZE(components); i++) {
+        if (components[i]->location_id == COMP_POS_ACTIVE) {
+            return components[i];
+        }
+    }
+
+    return components[0];
+}
+
 static void next_comp_anim_exec(void *var, int32_t progress)
 {
     struct next_comp_anim *move = var;
@@ -63,10 +74,50 @@ static void next_comp_anim_exec(void *var, int32_t progress)
     lv_obj_align(move->component->lvo_root, LV_ALIGN_CENTER, x, y);
 }
 
+static void create_screen_glow(lv_obj_t *parent, lv_color_t accent_color)
+{
+    const lv_color_t bg_color = GUI_COLOR(GUI_RGB_BG);
+    // const lv_color_t accent_color = GUI_COLOR(GUI_RGB_BLUE);
+    const lv_color_t center_color = lv_color_mix(accent_color, bg_color, LV_OPA_30);
+
+    lv_coord_t width = lv_obj_get_width(parent);
+    lv_coord_t height = lv_obj_get_height(parent);
+    lv_coord_t half_height = height / 4;
+    lv_coord_t quarter_height = half_height / 2;
+
+    lv_obj_t *top = lv_obj_create(parent);
+    lv_obj_remove_style_all(top);
+    lv_obj_set_size(top, width, half_height);
+    lv_obj_align(top, LV_ALIGN_CENTER, 0, -quarter_height);
+
+    lv_obj_set_style_bg_opa(top, LV_OPA_COVER, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(top, bg_color, LV_PART_MAIN);
+    lv_obj_set_style_bg_grad_color(top, center_color, LV_PART_MAIN);
+    lv_obj_set_style_bg_grad_dir(top, LV_GRAD_DIR_VER, LV_PART_MAIN);
+
+    lv_obj_t *bottom = lv_obj_create(parent);
+    lv_obj_remove_style_all(bottom);
+    lv_obj_set_size(bottom, width, half_height);
+    lv_obj_align(bottom, LV_ALIGN_CENTER, 0, quarter_height);
+
+    lv_obj_set_style_bg_opa(bottom, LV_OPA_COVER, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(bottom, center_color, LV_PART_MAIN);
+    lv_obj_set_style_bg_grad_color(bottom, bg_color, LV_PART_MAIN);
+    lv_obj_set_style_bg_grad_dir(bottom, LV_GRAD_DIR_VER, LV_PART_MAIN);
+
+    lv_obj_move_background(top);
+    lv_obj_move_background(bottom);
+}
+
 static void next_comp_anim_done(lv_anim_t *anim)
 {
     ARG_UNUSED(anim);
     next_comp_anim_active = false;
+
+
+    lv_obj_t *p = lv_obj_get_parent(humidity_view.lvo_root);
+    struct mini_sensor_view *active = get_active_component();
+    // create_screen_glow(p, GUI_COLOR(active->color_main_hex));
 }
 
 static int comp_create(struct mini_sensor_view *component, lv_obj_t *lvo_parent)
@@ -113,7 +164,6 @@ static int comp_create(struct mini_sensor_view *component, lv_obj_t *lvo_parent)
 
     // Data units label
     lv_obj_t * _units_label = lv_label_create(_meter);
-    component->lvo_data_unit = _units_label;
     lv_obj_set_style_text_font(_units_label, GUI_FONT_S, LV_PART_MAIN);
     lv_obj_set_style_text_color(_units_label, GUI_COLOR(GUI_RGB_TEXT_MUTED), LV_PART_MAIN);
     if (component->data_units_str == NULL) {
@@ -155,7 +205,6 @@ static void comp_destroy(struct mini_sensor_view *component)
     component->lvo_root = NULL;
     component->lvo_data_meter = NULL;
     component->lvo_data_value = NULL;
-    component->lvo_data_unit = NULL;
 }
 
 static int util_create(lv_obj_t *parent)
@@ -168,6 +217,9 @@ static int util_create(lv_obj_t *parent)
         components[i]->location_id = i;
         comp_create(components[i], parent);
     }
+
+    struct mini_sensor_view *active = get_active_component();
+    create_screen_glow(parent, GUI_COLOR(active->color_main_hex));
 
     return 0;
 }

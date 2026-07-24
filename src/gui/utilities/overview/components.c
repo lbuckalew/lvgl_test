@@ -18,8 +18,8 @@ struct mini_sensor_view temperature_view = {
 };
 
 struct mini_sensor_view pressure_view = {
-    .data_scale_min = 0,
-    .data_scale_max = 100,
+    .data_scale_min = 90,
+    .data_scale_max = 110,
     .data_units_str = "kPa",
     .color_main_hex = GUI_RGB_GREEN_BRIGHT,
     .color_accent_hex = GUI_RGB_GREEN,
